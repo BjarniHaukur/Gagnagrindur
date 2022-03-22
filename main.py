@@ -1,3 +1,4 @@
+import time
 import numpy as np
 from matplotlib import pyplot as plt
 from DataFrames import *
@@ -25,8 +26,22 @@ def my_print(costs):
     else:
         print("Last 10 entries: ", costs[0][-10:], costs[1][-10:])
 
+def measure_and_insert(keys, values, df: DataFrame):
+    then = time.time()
+    for k, v in zip(keys, values):
+        df.insert(k, v)
 
-def test(n, m, generator, verbose=False):
+    return time.time() - then
+
+def measure_search(access, df: DataFrame):
+    then = time.time()
+    for a in access:
+        _ = df.search(a)
+
+    return time.time() - then
+
+
+def test(n, m, generator):
     # Insert
     keys = get_keys(n)
     if n <= 26:
@@ -34,71 +49,59 @@ def test(n, m, generator, verbose=False):
     else:
         values = get_keys(n)
 
+    # Initialize
     bt = BinaryTree()
     tt = Treap(max_range=10**6)
     ll = LinkedList()
-    for i in range(n):
-        bt.insert(keys[i], values[i])
-        tt.insert(keys[i], values[i])
-        ll.insert(keys[i], values[i])
 
-    # Search
+    # Search for these keys
     access = generator(n, m)
+
+    bt_time = (measure_and_insert(keys, values, bt), measure_search(access, bt))
+    tt_time = (measure_and_insert(keys, values, tt), measure_search(access, tt))
+    ll_time = (measure_and_insert(keys, values, ll), measure_search(access, ll))
+
+    bt_op = bt.get_average_costs()
+    tt_op = tt.get_average_costs()
+    ll_op = ll.get_average_costs()
     
-    for a in access:
-        _ = bt.search(a)
-        _ = tt.search(a)
-        _ = ll.search(a)
+    return list(zip(bt_op, tt_op, ll_op)), list(zip(bt_time, tt_time, ll_time))
 
-    bt_avg = bt.get_average_costs()
-    tt_avg = tt.get_average_costs()
-    ll_avg = ll.get_average_costs()
-
-    if verbose:
-        print("Insert cost | search cost\n")
-        print("Binary Tree")
-        my_print(bt.get_costs())
-        print("Average cost", bt_avg, "\n")
-
-        print("Treap")
-        my_print(tt.get_costs())
-        print("Average cost", tt_avg, "\n")
-
-        print("Linked List (move to front)")
-        my_print(ll.get_costs())
-        print("Average cost", ll_avg, "\n")
-    
-    return [x for x in zip(bt_avg, tt_avg, ll_avg)]
-
-def run_and_plot(n_range, ma, generator, name, extra="", stepsize=10, verbose=False):
+def run_and_plot(n_range, ma, generator, name, extra="", stepsize=10):
     x_range = np.arange(stepsize, n_range+1, step=stepsize)
-    insert_hist = []
-    search_hist = []
-    if verbose: print("\nTest for ", name+extra)
+    iop_hist = []
+    sop_hist = []
+    itime_hist = []
+    stime_hist = []
     for n in x_range:        
-        y = test(n, ma, generator, verbose)
-        insert_hist.append(y[0])
-        search_hist.append(y[1])
+        ops, time = test(n, ma, generator)
+        iop_hist.append(ops[0])
+        sop_hist.append(ops[1])
+        itime_hist.append(time[0])
+        stime_hist.append(time[1])
     
-    fig, (ax1, ax2) = plt.subplots(1, 2)
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
     fig.suptitle(name+extra)
     labels = ["BinaryTree", "Treap", "LinkedList"]
     for i in range(3):
-        ax1.plot(x_range, [x[i] for x in insert_hist], label=labels[i])
-        ax2.plot(x_range, [x[i] for x in search_hist])
+        ax1.plot(x_range, [x[i] for x in iop_hist])
+        ax2.plot(x_range, [x[i] for x in sop_hist])
+        ax3.plot(x_range, [x[i] for x in itime_hist])
+        ax4.plot(x_range, [x[i] for x in stime_hist], label=labels[i])
 
     ax1.title.set_text("Insert cost")
     ax2.title.set_text("Search cost")
     fig.supxlabel("Number of keys")
-    fig.supylabel("Average number of operations")
-    fig.legend(loc="center right")
+    ax1.set(ylabel="Average number of operation")
+    ax3.set(ylabel="Time(s)")
+    ax4.legend(loc="upper left")
     plt.savefig(name+extra)
 
 
 if __name__ == '__main__':
-    n = 200
-    m = 2
-    a = 2
-    run_and_plot(n, m, equal_access_rates, "Equal Access Rates")
-    run_and_plot(n, a, zipf_distribution, "Zipf Distribution", f" a={a}")
+    for n in [100, 600]:
+        for m in [1, 25, 50, 100]:
+            run_and_plot(n, m, equal_access_rates, "Equal Access Rates", f" n={n}, m={m}")
+        for a in [2, 4]:
+            run_and_plot(n, a, zipf_distribution, "Zipf Distribution", f" n={n}, a={a}")
     
