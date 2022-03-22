@@ -1,0 +1,52 @@
+from abc import ABC, abstractmethod
+
+class DataFrame(ABC):
+
+    def __init__(self):
+        self.insert_costs = []
+        self.search_costs = []
+
+    @abstractmethod
+    def insert(self):
+        """
+            Inserts the key-value pair in accordance with the type of DataFrame and stores 
+            the number of opertions.
+        """
+    
+    @abstractmethod
+    def search(self):
+        """ 
+            Searches for the value associated to a key in accordance with the type
+            of DataFrame and stores the number of opertions.
+        """
+
+    def get_average_costs(self):
+        """ Returns the average of insert / search costs """
+        assert len(self.insert_costs) != 0 and len(self.search_costs) != 0, "Must search/insert first"
+        return (sum(self.insert_costs)/len(self.insert_costs),
+                sum(self.search_costs)/len(self.search_costs))
+                
+    def get_costs(self):
+        """ Returns the insert / search costs """
+        return self.insert_costs, self.search_costs
+
+class Tree(DataFrame):
+
+    def search(self, key):
+        self.search_costs.append(0)
+        return self.__search(self.root, key)
+
+    def __search(self, curr_node, key):
+        if curr_node is None:
+            print(f"key: {key} not found")
+            self.search_costs[-1] = 0
+            return None
+
+        self.search_costs[-1] += 1
+        if curr_node.key == key:
+            return curr_node.value
+        else:
+            if key <= curr_node.key:
+                return self.__search(curr_node.left, key)
+            else:
+                return self.__search(curr_node.right, key)

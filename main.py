@@ -1,5 +1,6 @@
 import time
 import numpy as np
+import pandas as pd
 from matplotlib import pyplot as plt
 from DataFrames import *
 
@@ -80,10 +81,14 @@ def run_and_plot(n_range, ma, generator, name, extra="", stepsize=10):
         itime_hist.append(time[0])
         stime_hist.append(time[1])
     
+    # data = pd.DataFrame(index=x_range, data=list(zip(iop_hist, sop_hist, itime_hist, stime_hist)),
+    #                     columns=["insert_operations", "search_operations", "insert_time", "search_time"])
+
+
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2)
     fig.suptitle(name+extra)
     labels = ["BinaryTree", "Treap", "LinkedList"]
-    for i in range(3):
+    for i in range(len(labels)):
         ax1.plot(x_range, [x[i] for x in iop_hist])
         ax2.plot(x_range, [x[i] for x in sop_hist])
         ax3.plot(x_range, [x[i] for x in itime_hist])
@@ -95,12 +100,12 @@ def run_and_plot(n_range, ma, generator, name, extra="", stepsize=10):
     ax1.set(ylabel="Average number of operation")
     ax3.set(ylabel="Time(s)")
     ax4.legend(loc="upper left")
-    plt.savefig(name+extra)
+    plt.savefig("myndir/" + name+extra)
 
 
 if __name__ == '__main__':
-    for n in [100, 600]:
-        for m in [1, 25, 50, 100]:
+    for n in [200, 600]:
+        for m in [1, 25, 50, 75, 100]:
             run_and_plot(n, m, equal_access_rates, "Equal Access Rates", f" n={n}, m={m}")
         for a in [2, 4]:
             run_and_plot(n, a, zipf_distribution, "Zipf Distribution", f" n={n}, a={a}")

@@ -1,0 +1,51 @@
+class Item:
+    def __init__(self, key, value):
+        self.key = key
+        self.value = value
+        self.next = None
+
+class LinkedList(DataFrame):
+    
+    def __init__(self):
+        super().__init__()
+        self.root: Item = None
+
+    def insert(self, key, value):
+        new = Item(key, value)
+        
+        if self.root is None:
+            self.insert_costs.append(0)
+            self.root = new
+            return
+
+        item = self.root
+        self.insert_costs.append(1)
+        while (item.next is not None):
+            item = item.next
+            self.insert_costs[-1] += 1
+        
+        item.next = new
+         
+
+    def search(self, key):
+        assert self.root is not None, "Must insert atleast 1 element before searching"
+        self.search_costs.append(0)
+        item = self.root
+
+        if item.key == key:
+            return item.value
+
+        while (item.next is not None):
+            self.search_costs[-1] += 1
+            if item.next.key == key:
+                temp = item.next
+                item.next = item.next.next
+                temp.next = self.root
+                self.root = temp
+                return self.root.value
+            else:
+                item = item.next
+
+
+        print(f"Value with key: {key} not found")
+        return 0

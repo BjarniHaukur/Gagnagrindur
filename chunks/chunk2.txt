@@ -1,0 +1,35 @@
+class Node:
+    def __init__(self, key, value):
+        self.left = None
+        self.right = None
+        self.key = key
+        self.value = value
+
+class BinaryTree(Tree):
+
+    def __init__(self):
+        super().__init__()
+        self.root: Node = None
+
+    def insert(self, key, value):
+        new = Node(key, value)
+        self.insert_costs.append(0)
+        if self.root is None:
+            self.root = new
+        else:
+            self.__insert(self.root, new)
+
+    def __insert(self, curr_node, new_node):
+        self.insert_costs[-1] += 1
+        
+        if new_node.key <= curr_node.key:
+            if curr_node.left is None:
+                curr_node.left = new_node
+            else:
+                self.__insert(curr_node.left, new_node)
+        
+        else:
+            if curr_node.right is None:
+                curr_node.right = new_node
+            else:
+                self.__insert(curr_node.right, new_node)

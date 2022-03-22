@@ -1,0 +1,29 @@
+def get_keys(n):
+    arr = np.arange(1, n+1)
+    np.random.shuffle(arr)
+    return arr
+
+def equal_access_rates(n, m):
+    access = np.array([i for i in range(1, n+1) for _ in range(m)])
+    np.random.shuffle(access)
+    return access
+
+def zipf_distribution(n, distribution):
+    zipf = np.random.zipf(a=distribution, size=n)
+    access = np.array([(i+1) for i in range(n) for _ in range(zipf[i])])
+    np.random.shuffle(access)
+    return access
+
+def measure_and_insert(keys, values, df: DataFrame):
+    then = time.time()
+    for k, v in zip(keys, values):
+        df.insert(k, v)
+
+    return time.time() - then
+
+def measure_search(access, df: DataFrame):
+    then = time.time()
+    for a in access:
+        _ = df.search(a)
+
+    return time.time() - then

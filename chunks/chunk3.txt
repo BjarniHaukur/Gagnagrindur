@@ -1,0 +1,52 @@
+class TreapNode(Node):
+    def __init__(self, key, value, priority):
+        super().__init__(key, value)
+        self.priority = priority
+
+class Treap(Tree):
+
+    def __init__(self, max_range=10**3):
+        super().__init__()
+        self.max_range = max_range
+        self.root: TreapNode = None
+
+
+    def insert(self, key, value):
+        new = TreapNode(key, value, self.__generator())
+        self.insert_costs.append(0)
+        if self.root is None:
+            self.root = new
+            return
+        
+        left, right = self.split(self.root, key)
+        self.root = self.merge(left, new)
+        self.root = self.merge(self.root, right)
+
+    def split(self, node, key):
+        self.insert_costs[-1] += 1
+        if node is None:
+            return None, None
+        
+        if key < node.key:
+            left, node.left = self.split(node.left, key)
+            return left, node
+        else:
+            node.right, right = self.split(node.right, key)
+            return node, right
+
+    def merge(self, left, right):
+        self.insert_costs[-1] += 1
+        if left is None:
+            return right
+        if right is None:
+            return left
+
+        if left.priority > right.priority:
+            left.right = self.merge(left.right, right)
+            return left
+        else:
+            right.left = self.merge(left, right.left)
+            return right
+
+    def __generator(self):
+        return randint(1, self.max_range)

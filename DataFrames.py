@@ -78,7 +78,9 @@ class Tree(DataFrame):
 
 class BinaryTree(Tree):
 
-    root: Node = None
+    def __init__(self):
+        super().__init__()
+        self.root: Node = None
 
     def insert(self, key, value):
         new = Node(key, value)
@@ -106,11 +108,10 @@ class BinaryTree(Tree):
 
 class Treap(Tree):
 
-    root: TreapNode = None
-
     def __init__(self, max_range=10**3):
         super().__init__()
         self.max_range = max_range
+        self.root: TreapNode = None
 
 
     def insert(self, key, value):
@@ -161,7 +162,9 @@ class Item:
 
 class LinkedList(DataFrame):
     
-    root: Item = None
+    def __init__(self):
+        super().__init__()
+        self.root: Item = None
 
     def insert(self, key, value):
         new = Item(key, value)
